@@ -1757,8 +1757,8 @@ const SplitPanel = ({ noConfig, tbaCall, tbaConfig }) => {
       <div className="split-left" style={{ width: `${splitPct}%` }}>
         <div className="lovat-reminder">
           <span className="lovat-reminder-icon">⚠</span>
-          Remember to upload the latest Lovat CSV — go to{" "}
-          <a href="/config" className="lovat-reminder-link">Config</a> to update.
+          Remember to upload the latest Lovat CSV before each match day — go to{" "}
+          <Link to="/config" className="lovat-reminder-link">Config</Link> to update.
         </div>
         {renderPanel(leftTabs, safeLeftActive, (k) => { setLeftActive(k); }, "left")}
       </div>
