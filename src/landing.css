@@ -1,0 +1,157 @@
+/* ── RESET & BASE ── */
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ── FULL WIDTH LAYOUT ── */
+.page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header,
+.hero,
+footer {
+  width: 100%;
+}
+
+/* ── HEADER ── */
+header {
+  padding: 28px 6vw 0;
+}
+
+/* ── HERO ── */
+.hero {
+  flex: 1;
+  padding: 40px 6vw;
+}
+
+.nav-grid {
+  width: 100%;
+  max-width: 860px;
+}
+
+/* ── FOOTER ── */
+footer {
+  padding: 20px 6vw;
+}
+
+/* ════════════════════════════════
+   TABLET  (max 900px)
+════════════════════════════════ */
+@media (max-width: 900px) {
+  header {
+    padding: 24px 5vw 0;
+  }
+
+  .hero {
+    padding: 36px 5vw;
+  }
+
+  .title {
+    font-size: clamp(48px, 10vw, 80px) !important;
+  }
+
+  .nav-grid {
+    max-width: 100%;
+    gap: 8px;
+  }
+
+  footer {
+    padding: 18px 5vw;
+  }
+}
+
+/* ════════════════════════════════
+   MOBILE  (max 640px)
+════════════════════════════════ */
+@media (max-width: 640px) {
+  header {
+    padding: 18px 5vw 0;
+  }
+
+  .logo-box {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .logo-placeholder {
+    font-size: 13px !important;
+  }
+
+  .logo-team {
+    font-size: 9px !important;
+    letter-spacing: 2px !important;
+  }
+
+  .logo-name {
+    font-size: 13px !important;
+  }
+
+  .hero {
+    padding: 28px 5vw;
+    justify-content: center;
+  }
+
+  .title {
+    font-size: clamp(42px, 13vw, 64px) !important;
+    margin-bottom: 36px !important;
+  }
+
+  .nav-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px;
+  }
+
+  .nav-btn {
+    padding: 18px 18px !important;
+  }
+
+  .btn-label {
+    font-size: 14px !important;
+  }
+
+  footer {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px;
+    padding: 16px 5vw;
+    text-align: center;
+  }
+
+  .footer-line {
+    display: none !important;
+  }
+
+  .footer-credit {
+    font-size: 10px !important;
+  }
+}
+
+/* ════════════════════════════════
+   SMALL MOBILE  (max 380px)
+════════════════════════════════ */
+@media (max-width: 380px) {
+  .title {
+    font-size: 36px !important;
+  }
+
+  .btn-index {
+    display: none;
+  }
+
+  .nav-btn {
+    gap: 10px !important;
+  }
+}

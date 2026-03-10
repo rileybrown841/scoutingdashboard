@@ -1,0 +1,218 @@
+/* ── RESET & BASE ── */
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ── FULL WIDTH LAYOUT ── */
+.page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header,
+footer {
+  width: 100%;
+}
+
+/* ── HEADER ── */
+header {
+  padding: 28px 6vw 0;
+}
+
+/* ── MAIN CONTENT ── */
+main {
+  flex: 1;
+  padding: 48px 6vw;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* ── PAGE TITLE ── */
+.page-title {
+  font-size: clamp(32px, 5vw, 52px);
+}
+
+/* ── PANELS ── */
+.panels {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.upload-panel {
+  width: 100%;
+}
+
+/* ── DROP ZONE ── */
+.drop-zone {
+  width: 100%;
+}
+
+/* ── SHEET INPUT ROW ── */
+.sheet-input-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.sheet-input {
+  flex: 1;
+  min-width: 0; /* prevents overflow in flex */
+}
+
+/* ── FOOTER ── */
+footer {
+  padding: 20px 6vw;
+}
+
+/* ════════════════════════════════
+   TABLET  (max 900px)
+════════════════════════════════ */
+@media (max-width: 900px) {
+  header {
+    padding: 24px 5vw 0;
+  }
+
+  main {
+    padding: 36px 5vw;
+    max-width: 100%;
+  }
+
+  .upload-panel {
+    padding: 22px 24px;
+  }
+
+  footer {
+    padding: 18px 5vw;
+  }
+}
+
+/* ════════════════════════════════
+   MOBILE  (max 640px)
+════════════════════════════════ */
+@media (max-width: 640px) {
+  header {
+    padding: 18px 5vw 0;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .logo-box {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .logo-placeholder {
+    font-size: 13px !important;
+  }
+
+  .logo-team {
+    font-size: 9px !important;
+    letter-spacing: 2px !important;
+  }
+
+  .logo-name {
+    font-size: 13px !important;
+  }
+
+  .back-btn {
+    font-size: 10px !important;
+    padding: 6px 12px !important;
+  }
+
+  main {
+    padding: 28px 5vw;
+  }
+
+  .page-title {
+    font-size: clamp(26px, 8vw, 38px) !important;
+    margin-bottom: 4px !important;
+  }
+
+  .page-subtitle {
+    margin-bottom: 32px !important;
+  }
+
+  .upload-panel {
+    padding: 18px 18px !important;
+  }
+
+  .panel-title {
+    font-size: 17px !important;
+  }
+
+  .panel-desc {
+    font-size: 12px !important;
+  }
+
+  .drop-zone {
+    padding: 24px 16px !important;
+  }
+
+  /* Stack fetch button below input on mobile */
+  .sheet-input-row {
+    flex-direction: column;
+  }
+
+  .fetch-btn {
+    width: 100%;
+    padding: 12px !important;
+  }
+
+  .sheet-status {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .refresh-btn {
+    margin-left: 0 !important;
+  }
+
+  footer {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px;
+    padding: 16px 5vw;
+    text-align: center;
+  }
+
+  .footer-line {
+    display: none !important;
+  }
+
+  .footer-credit {
+    font-size: 10px !important;
+  }
+}
+
+/* ════════════════════════════════
+   SMALL MOBILE  (max 380px)
+════════════════════════════════ */
+@media (max-width: 380px) {
+  .panel-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .wip-badge {
+    font-size: 8px !important;
+  }
+
+  .dz-prompt {
+    font-size: 14px !important;
+  }
+}
