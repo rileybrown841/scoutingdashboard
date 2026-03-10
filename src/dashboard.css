@@ -2,20 +2,20 @@
 
 /* ── VARIABLES ── */
 :root {
-  --yellow:      #ffcc00;
-  --yellow-dim:  rgba(255,204,0,0.55);
-  --yellow-faint:rgba(255,204,0,0.12);
-  --red:         #ff0000;
-  --bg:          #0a0f16;
-  --bg-panel:    rgba(14,20,30,0.92);
-  --bg-panel-h:  rgba(20,28,40,0.95);
-  --border:      rgba(255,204,0,0.18);
-  --border-h:    rgba(255,204,0,0.4);
-  --text:        #f0f0ec;
-  --text-dim:    rgba(240,240,236,0.55);
-  --text-faint:  rgba(240,240,236,0.25);
-  --green:       #22c55e;
-  --loss-red:    #ef4444;
+  --yellow:      #ffdd33;
+  --yellow-dim:  rgba(255,221,51,0.85);
+  --yellow-faint:rgba(255,221,51,0.25);
+  --red:         #ff3333;
+  --bg:          #0d1117;
+  --bg-panel:    rgba(18,24,36,0.95);
+  --bg-panel-h:  rgba(24,32,48,0.98);
+  --border:      rgba(255,221,51,0.35);
+  --border-h:    rgba(255,221,51,0.75);
+  --text:        #ffffff;
+  --text-dim:    rgba(255,255,255,0.85);
+  --text-faint:  rgba(255,255,255,0.6);
+  --green:       #44d66e;
+  --loss-red:    #ff5555;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,8 +35,8 @@ body {
   position: fixed; border-radius: 50%;
   filter: blur(130px); pointer-events: none; z-index: 0;
 }
-.blob-1 { width: 600px; height: 600px; background: #ffcc00; opacity: 0.13; top: -200px; right: -100px; }
-.blob-2 { width: 400px; height: 400px; background: #ff0000; opacity: 0.08; bottom: -80px; left: -80px; }
+.blob-1 { width: 600px; height: 600px; background: #ffdd33; opacity: 0.2; top: -200px; right: -100px; }
+.blob-2 { width: 400px; height: 400px; background: #ff3333; opacity: 0.15; bottom: -80px; left: -80px; }
 
 .scanlines {
   position: fixed; inset: 0;
@@ -67,32 +67,33 @@ body {
 .logo-zone { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .logo-box {
   width: 46px; height: 46px;
-  border: 1.5px solid var(--yellow-dim);
+  border: 1.5px solid var(--yellow);
   background: var(--yellow-faint);
   display: flex; align-items: center; justify-content: center;
   clip-path: polygon(7px 0%, 100% 0%, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0% 100%, 0% 7px);
 }
 .logo-placeholder { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--yellow); font-weight: bold; }
 .logo-text-group { display: flex; flex-direction: column; }
-.logo-team { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--yellow); letter-spacing: 3px; text-transform: uppercase; opacity: 0.7; }
+.logo-team { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--yellow); letter-spacing: 3px; text-transform: uppercase; opacity: 1; font-weight: 600; }
 .logo-name { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 1px; }
 
 .header-center { flex: 1; text-align: center; padding: 0 16px; }
 .hdr-event-name { font-family: 'Rajdhani', sans-serif; font-size: clamp(15px, 2vw, 22px); font-weight: 700; color: var(--yellow); letter-spacing: 1px; }
-.hdr-event-meta { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 1.5px; margin-top: 3px; }
-.hdr-no-config  { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,204,0,0.5); letter-spacing: 2px; }
+.hdr-event-meta { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 1.5px; margin-top: 3px; font-weight: 500; }
+.hdr-no-config  { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,221,51,0.8); letter-spacing: 2px; font-weight: 500; }
 .hdr-loading    { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--yellow-dim); letter-spacing: 2px; display: flex; align-items: center; gap: 8px; justify-content: center; }
-.hdr-error      { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,0,0,0.7); letter-spacing: 1px; }
+.hdr-error      { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,85,85,0.9); letter-spacing: 1px; font-weight: 500; }
 
 .back-btn {
   font-family: 'Share Tech Mono', monospace; font-size: 10px;
-  color: var(--yellow-dim); letter-spacing: 2px;
+  color: var(--yellow); letter-spacing: 2px;
   text-decoration: none; flex-shrink: 0;
-  border: 1px solid rgba(255,204,0,0.25); padding: 7px 14px;
+  border: 1px solid rgba(255,221,51,0.5); padding: 7px 14px;
   clip-path: polygon(5px 0%, 100% 0%, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0% 100%, 0% 5px);
   transition: all 0.2s;
+  font-weight: 600;
 }
-.back-btn:hover { color: var(--yellow); border-color: var(--border-h); background: var(--yellow-faint); }
+.back-btn:hover { color: #ffffff; border-color: var(--yellow); background: rgba(255,221,51,0.15); }
 
 /* ── MAIN BODY ── */
 .db-main {
@@ -232,8 +233,8 @@ body {
 
 .tab-btn {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 13px; font-weight: 600; letter-spacing: 1px;
-  color: var(--text-dim);
+  font-size: 13px; font-weight: 700; letter-spacing: 1px;
+  color: var(--text);
   background: transparent; border: none;
   padding: 10px 16px; cursor: grab;
   position: relative; transition: color 0.2s, background 0.2s;
@@ -243,10 +244,10 @@ body {
   display: flex; align-items: center; gap: 6px;
 }
 .tab-btn:active { cursor: grabbing; }
-.tab-btn:hover { color: var(--yellow-dim); background: rgba(255,204,0,0.04); }
+.tab-btn:hover { color: var(--yellow); background: rgba(255,221,51,0.1); }
 .tab-btn.tab-active {
   color: var(--yellow);
-  background: rgba(255,204,0,0.07);
+  background: rgba(255,221,51,0.15);
   cursor: grab;
 }
 .tab-btn.tab-active::after {
@@ -256,11 +257,11 @@ body {
 }
 .tab-drag-grip {
   font-size: 10px;
-  color: rgba(255,204,0,0.25);
+  color: rgba(255,221,51,0.5);
   line-height: 1;
   transition: color 0.15s;
 }
-.tab-btn:hover .tab-drag-grip { color: rgba(255,204,0,0.55); }
+.tab-btn:hover .tab-drag-grip { color: rgba(255,221,51,0.9); }
 
 /* ── PANEL BODY ── */
 .panel-body {
@@ -331,42 +332,43 @@ body {
 .data-table thead { position: sticky; top: 0; z-index: 2; }
 .data-table th {
   font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 3px;
-  color: var(--yellow-dim); text-transform: uppercase;
+  color: var(--yellow); text-transform: uppercase;
   padding: 11px 14px; text-align: left;
-  border-bottom: 1px solid rgba(255,204,0,0.15);
-  background: rgba(10,15,22,0.98);
+  border-bottom: 1px solid rgba(255,221,51,0.3);
+  background: rgba(13,17,23,0.98);
   backdrop-filter: blur(8px);
   white-space: nowrap;
+  font-weight: 600;
 }
 
 .data-table td {
   font-family: 'Exo 2', sans-serif; font-size: 13px;
-  color: var(--text-dim);
+  color: var(--text);
   padding: 9px 14px;
-  border-bottom: 1px solid rgba(255,204,0,0.06);
+  border-bottom: 1px solid rgba(255,221,51,0.15);
   vertical-align: middle;
 }
-.data-table tbody tr:hover td { background: rgba(255,204,0,0.04); color: var(--text); }
+.data-table tbody tr:hover td { background: rgba(255,221,51,0.1); color: var(--text); }
 
 /* My team row highlight */
-.my-team-row td { background: rgba(255,204,0,0.08) !important; color: var(--text) !important; }
+.my-team-row td { background: rgba(255,221,51,0.15) !important; color: var(--text) !important; }
 .my-team-row .td-rank,
-.my-team-row .td-accent { color: var(--yellow) !important; }
+.my-team-row .td-accent { color: var(--yellow) !important; font-weight: 700; }
 
 /* Cell types */
 .td-rank   { font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: bold; color: var(--yellow); width: 52px; }
 .td-team   { font-family: 'Rajdhani', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); }
-.td-record { font-family: 'Share Tech Mono', monospace; font-size: 12px; }
-.td-accent { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: rgba(255,204,0,0.8); }
-.td-match  { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,204,0,0.75); white-space: nowrap; width: 80px; }
+.td-record { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text-dim); }
+.td-accent { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--yellow); font-weight: 600; }
+.td-match  { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--yellow-dim); white-space: nowrap; width: 80px; }
 
 /* Clickable ranking rows */
 .rk-row { cursor: pointer; transition: background 0.12s; }
-.rk-row:hover td { background: rgba(255,204,0,0.07) !important; }
-.rk-row:active td { background: rgba(255,204,0,0.12) !important; }
+.rk-row:hover td { background: rgba(255,221,51,0.12) !important; }
+.rk-row:active td { background: rgba(255,221,51,0.2) !important; }
 .rk-hint {
   font-size: 9px; margin-left: 6px; opacity: 0;
-  color: rgba(255,204,0,0.5); transition: opacity 0.15s;
+  color: rgba(255,221,51,0.8); transition: opacity 0.15s;
   vertical-align: middle;
 }
 .rk-row:hover .rk-hint { opacity: 1; }
@@ -466,9 +468,10 @@ body {
   display: flex; align-items: center; justify-content: center; gap: 10px;
   flex: 1; min-height: 180px;
   font-family: 'Share Tech Mono', monospace; font-size: 12px; letter-spacing: 2px;
+  font-weight: 500;
 }
-.panel-state.loading { color: rgba(255,204,0,0.5); }
-.panel-state.error   { color: rgba(255,80,80,0.8); }
+.panel-state.loading { color: rgba(255,221,51,0.9); }
+.panel-state.error   { color: rgba(255,85,85,0.95); }
 .panel-state.empty   { color: var(--text-faint); }
 
 /* ── PLACEHOLDER ── */
@@ -589,35 +592,37 @@ body {
 .pl-table th {
   font-family: 'Share Tech Mono', monospace;
   font-size: 8px; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--yellow-dim);
+  color: var(--yellow);
   padding: 10px 10px;
   text-align: left;
-  border-bottom: 1px solid rgba(255,204,0,0.18);
-  background: rgba(10,15,22,0.98);
+  border-bottom: 1px solid rgba(255,221,51,0.3);
+  background: rgba(13,17,23,0.98);
   backdrop-filter: blur(8px);
   white-space: nowrap;
+  font-weight: 600;
 }
 
 .pl-row td {
   padding: 6px 8px;
-  border-bottom: 1px solid rgba(255,204,0,0.05);
+  border-bottom: 1px solid rgba(255,221,51,0.1);
   vertical-align: top;
 }
-.pl-row-even td { background: rgba(255,204,0,0.02); }
-.pl-row:hover td { background: rgba(255,204,0,0.045); }
+.pl-row-even td { background: rgba(255,221,51,0.05); }
+.pl-row:hover td { background: rgba(255,221,51,0.1); }
 
 .pl-td-num {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px; color: rgba(255,204,0,0.4);
+  font-size: 11px; color: rgba(255,221,51,0.7);
   text-align: center; vertical-align: middle;
   padding-top: 10px;
+  font-weight: 600;
 }
 
 /* Team inputs */
 .pl-team-inputs { display: flex; flex-direction: column; gap: 4px; }
 .pl-input {
   background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,204,0,0.14);
+  border: 1px solid rgba(255,221,51,0.25);
   color: var(--text);
   font-family: 'Share Tech Mono', monospace;
   font-size: 11px;
@@ -626,10 +631,10 @@ body {
   width: 100%;
   transition: border-color 0.18s;
 }
-.pl-input:focus { border-color: rgba(255,204,0,0.5); }
+.pl-input:focus { border-color: rgba(255,221,51,0.7); }
 .pl-input::placeholder { color: var(--text-faint); }
 .pl-team-num  { font-size: 12px; font-weight: bold; color: var(--yellow); }
-.pl-team-name { font-size: 11px; color: var(--text-dim); }
+.pl-team-name { font-size: 11px; color: var(--text); }
 
 /* Role / watch toggle chips */
 .pl-chips { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 3px; }
@@ -638,27 +643,29 @@ body {
   font-family: 'Share Tech Mono', monospace;
   font-size: 9px; letter-spacing: 1px;
   padding: 4px 8px;
-  border: 1px solid rgba(255,204,0,0.2);
+  border: 1px solid rgba(255,221,51,0.35);
   background: transparent;
-  color: var(--text-faint);
+  color: var(--text-dim);
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
 }
-.pl-chip:hover { border-color: rgba(255,204,0,0.45); color: var(--yellow-dim); }
+.pl-chip:hover { border-color: rgba(255,221,51,0.7); color: var(--yellow); }
 
 /* Role chip — active = yellow */
 .pl-chip-on {
-  background: rgba(255,204,0,0.15) !important;
-  border-color: rgba(255,204,0,0.6) !important;
+  background: rgba(255,221,51,0.25) !important;
+  border-color: var(--yellow) !important;
   color: var(--yellow) !important;
+  font-weight: 600;
 }
 
 /* Watch chip — active = red/orange */
 .pl-chip-watch-on {
-  background: rgba(255,80,0,0.15) !important;
-  border-color: rgba(255,120,0,0.6) !important;
-  color: #ff9933 !important;
+  background: rgba(255,100,0,0.25) !important;
+  border-color: rgba(255,140,0,0.8) !important;
+  color: #ffaa44 !important;
+  font-weight: 600;
 }
 
 /* Textareas */
@@ -1333,13 +1340,13 @@ body {
 .db-footer {
   position: relative; z-index: 10; padding: 14px 28px;
   display: flex; align-items: center; justify-content: space-between;
-  border-top: 1px solid rgba(255,204,0,0.1);
+  border-top: 1px solid rgba(255,221,51,0.2);
   opacity: 0; animation: fadeUp 0.5s ease 0.5s forwards;
 }
-.footer-credit { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-faint); letter-spacing: 1.5px; }
-.footer-credit span { color: var(--yellow-dim); }
-.footer-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,0,0,0.12), rgba(255,204,0,0.18), transparent); margin: 0 20px; }
-.footer-ver { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: rgba(240,240,236,0.2); }
+.footer-credit { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 1.5px; }
+.footer-credit span { color: var(--yellow); font-weight: 600; }
+.footer-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,51,51,0.2), rgba(255,221,51,0.3), transparent); margin: 0 20px; }
+.footer-ver { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.4); }
 
 /* ── ANIMATIONS ── */
 @keyframes fadeUp   { from { opacity: 0; transform: translateY(14px);  } to { opacity: 1; transform: translateY(0); } }

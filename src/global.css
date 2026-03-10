@@ -4,15 +4,15 @@
 */
 
 :root {
-  --site-bg:      #0a0f16;
-  --site-yellow:  #ffcc00;
-  --site-red:     #ff0000;
-  --site-text:    #f0f0ec;
-  --site-dim:     rgba(240,240,236,0.55);
-  --site-faint:   rgba(240,240,236,0.25);
-  --site-border:  rgba(255,204,0,0.2);
-  --site-border-h:rgba(255,204,0,0.5);
-  --site-panel:   rgba(14,20,30,0.92);
+  --site-bg:      #0d1117;
+  --site-yellow:  #ffdd33;
+  --site-red:     #ff3333;
+  --site-text:    #ffffff;
+  --site-dim:     rgba(255,255,255,0.85);
+  --site-faint:   rgba(255,255,255,0.6);
+  --site-border:  rgba(255,221,51,0.35);
+  --site-border-h:rgba(255,221,51,0.8);
+  --site-panel:   rgba(18,24,36,0.95);
 }
 
 html, body {
@@ -20,33 +20,60 @@ html, body {
   color: var(--site-text);
 }
 
-/* Brighter grid lines on all pages */
+/* Much brighter grid lines on all pages */
 .grid-bg pattern path {
-  stroke: rgba(255,204,0,0.1) !important;
+  stroke: rgba(255,221,51,0.25) !important;
 }
 
-/* Make logo boxes brighter across all pages */
-.logo-team  { opacity: 0.8 !important; }
-.logo-name  { color: var(--site-text) !important; }
+/* Brighter logo boxes across all pages */
+.logo-team  { opacity: 1 !important; color: rgba(255,221,51,0.9) !important; }
+.logo-name  { color: #ffffff !important; }
 
-/* Brighter footer text */
-.footer-credit { color: rgba(240,240,236,0.35) !important; }
-.footer-ver    { color: rgba(240,240,236,0.25) !important; }
+/* Much brighter footer text */
+.footer-credit { color: rgba(255,255,255,0.7) !important; }
+.footer-ver    { color: rgba(255,255,255,0.5) !important; }
 
-/* Brighter nav buttons on landing */
-.btn-label { color: var(--site-text) !important; }
-.btn-index { color: rgba(255,204,0,0.5) !important; }
-.nav-btn   { border-color: rgba(255,204,0,0.22) !important; }
-.nav-btn:hover { border-color: rgba(255,204,0,0.6) !important; }
+/* Much brighter nav buttons on landing */
+.btn-label { color: #ffffff !important; font-weight: 500 !important; }
+.btn-index { color: rgba(255,221,51,0.8) !important; }
+.nav-btn   { border-color: rgba(255,221,51,0.4) !important; }
+.nav-btn:hover { 
+  border-color: rgba(255,221,51,1) !important; 
+  background: rgba(255,221,51,0.05) !important;
+}
 
-/* Brighter panel text on config */
-.panel-title { color: var(--site-text) !important; }
-.panel-desc  { color: rgba(240,240,236,0.55) !important; }
-.tba-label   { color: rgba(255,204,0,0.6) !important; }
-.sheet-hint  { color: rgba(240,240,236,0.3) !important; }
-.dz-prompt   { color: rgba(240,240,236,0.75) !important; }
-.preview-label { color: rgba(255,204,0,0.55) !important; }
-.col-tag     { color: rgba(240,240,236,0.65) !important; }
+/* Much brighter panel text on config */
+.panel-title { color: #ffffff !important; font-weight: 600 !important; }
+.panel-desc  { color: rgba(255,255,255,0.85) !important; }
+.tba-label   { color: rgba(255,221,51,0.95) !important; font-weight: 500 !important; }
+.sheet-hint  { color: rgba(255,255,255,0.6) !important; }
+.dz-prompt   { color: rgba(255,255,255,0.95) !important; font-weight: 500 !important; }
+.preview-label { color: rgba(255,221,51,0.9) !important; font-weight: 500 !important; }
+.col-tag     { color: rgba(255,255,255,0.9) !important; }
 
-/* Brighter page title on config */
-.page-subtitle { color: rgba(240,240,236,0.45) !important; }
+/* Much brighter page title on config */
+.page-subtitle { color: rgba(255,255,255,0.75) !important; }
+
+/* Brighter input fields and buttons */
+input, textarea, select {
+  color: #ffffff !important;
+  border-color: rgba(255,221,51,0.3) !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: rgba(255,221,51,0.8) !important;
+}
+
+/* Brighter buttons */
+button {
+  color: #ffffff !important;
+}
+
+/* Brighter links */
+a {
+  color: rgba(255,221,51,0.9) !important;
+}
+
+a:hover {
+  color: #ffdd33 !important;
+}
