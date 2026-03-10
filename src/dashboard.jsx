@@ -577,10 +577,10 @@ const ExportModal = ({ onClose, rows, tbaConfig, lovatData, pitData }) => {
           ]);
         });
       } else {
-        // Initial: full picklist with cross-off status, day2 scouting, notes + optional extras
+        // Initial: full picklist with day2 scouting, notes + optional extras (no crossed-off status)
         headers = [
           "Pick #", "Team #", "Team Name", "Role(s)",
-          "2nd Day: Watch", "2nd Day: Talk To", "Notes", "Picked (crossed off)",
+          "2nd Day: Watch", "2nd Day: Talk To", "Notes",
           ...extraLovatHeaders, ...extraPitHeaders,
         ];
         wsData = [headers];
@@ -595,7 +595,6 @@ const ExportModal = ({ onClose, rows, tbaConfig, lovatData, pitData }) => {
             r.watch.includes("Watch Them") ? "Yes" : "",
             r.watch.includes("Talk To Them") ? "Yes" : "",
             r.notes,
-            r.crossed ? "Yes" : "",
             ...lovatCols.map(k => fmtLovat(k, lovatRow?.[k])),
             ...pitCols.map(k => {
               const val = pitRow?.[k];
@@ -611,7 +610,7 @@ const ExportModal = ({ onClose, rows, tbaConfig, lovatData, pitData }) => {
       // Column widths
       const baseWidths = exportType === "final"
         ? [7, 9, 22, 24]
-        : [7, 9, 22, 24, 14, 16, 40, 16];
+        : [7, 9, 22, 24, 14, 16, 40]; // removed crossed-off column width
       ws["!cols"] = [
         ...baseWidths.map(w => ({ wch: w })),
         ...lovatCols.map(() => ({ wch: 14 })),
@@ -627,18 +626,6 @@ const ExportModal = ({ onClose, rows, tbaConfig, lovatData, pitData }) => {
         if (!ws[ref]) return;
         ws[ref].s = { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "1A2535" } }, alignment: { horizontal: "center" } };
       });
-
-      // Style crossed-off rows (light red fill) for initial export
-      if (exportType === "initial") {
-        rows.forEach((r, i) => {
-          if (!r.crossed) return;
-          headers.forEach((_, ci) => {
-            const ref = XLSX.utils.encode_cell({ r: i + 1, c: ci });
-            if (!ws[ref]) ws[ref] = { v: "" };
-            ws[ref].s = { ...(ws[ref].s ?? {}), fill: { fgColor: { rgb: "3D1515" } }, font: { color: { rgb: "885555" } } };
-          });
-        });
-      }
 
       const wb = XLSX.utils.book_new();
       const sheetName = exportType === "final" ? "Final Picklist" : "Initial Picklist";
@@ -665,7 +652,7 @@ const ExportModal = ({ onClose, rows, tbaConfig, lovatData, pitData }) => {
           <div className="pl-modal-section-label">EXPORT TYPE</div>
           <div className="pl-export-type-row">
             {[
-              { key: "initial", label: "Initial Picklist", desc: "All rows · Day 2 scouting · Notes · Crossed-off status" },
+              { key: "initial", label: "Initial Picklist", desc: "All rows · Day 2 scouting · Notes" },
               { key: "final",   label: "Final Picklist",   desc: "Filled rows only · Team + Role · No scouting columns" },
             ].map(t => (
               <button
@@ -678,37 +665,11 @@ const ExportModal = ({ onClose, rows, tbaConfig, lovatData, pitData }) => {
               </button>
             ))}
           </div>
-          
-          {/* Show what columns are included by default */}
-          <div className="pl-modal-default-cols">
-            <div className="pl-modal-default-label">Included columns:</div>
-            <div className="pl-modal-col-preview">
-              {exportType === "final" ? (
-                <>
-                  <span className="pl-modal-col-tag pl-modal-col-default">Pick #</span>
-                  <span className="pl-modal-col-tag pl-modal-col-default">Team #</span>
-                  <span className="pl-modal-col-tag pl-modal-col-default">Team Name</span>
-                  <span className="pl-modal-col-tag pl-modal-col-default">Role(s)</span>
-                </>
-              ) : (
-                <>
-                  <span className="pl-modal-col-tag pl-modal-col-default">Pick #</span>
-                  <span className="pl-modal-col-tag pl-modal-col-default">Team #</span>
-                  <span className="pl-modal-col-tag pl-modal-col-default">Team Name</span>
-                  <span className="pl-modal-col-tag pl-modal-col-default">Role(s)</span>
-                  <span className="pl-modal-col-tag pl-modal-col-default">2nd Day: Watch</span>
-                  <span className="pl-modal-col-tag pl-modal-col-default">2nd Day: Talk To</span>
-                  <span className="pl-modal-col-tag pl-modal-col-default">Notes</span>
-                  <span className="pl-modal-col-tag pl-modal-col-default">Picked (crossed off)</span>
-                </>
-              )}
-            </div>
-          </div>
         </div>
 
         {/* Extra columns */}
-        <div className="pl-modal-section">
-          <div className="pl-modal-section-label">ADDITIONAL COLUMNS (OPTIONAL)</div>
+        <div className="pl-modal-section pl-modal-section-large">
+          <div className="pl-modal-section-label">SELECT DATA TO INCLUDE (OPTIONAL)</div>
           <div className="pl-modal-pickers">
 
             {/* Lovat picker */}
@@ -717,7 +678,7 @@ const ExportModal = ({ onClose, rows, tbaConfig, lovatData, pitData }) => {
                 LOVAT {lovatCols.length > 0 && <span className="stats-col-count">{lovatCols.length}</span>}
               </button>
               {lovatOpen && (
-                <div className="stats-picker pl-modal-drop pl-modal-drop-large">
+                <div className="stats-picker pl-modal-drop pl-modal-drop-xlarge">
                   <div className="stats-picker-header">Lovat Fields</div>
                   {PL_LOVAT_GROUPS_ORDER.map(g => (
                     <div key={g} className="stats-picker-group">
@@ -741,7 +702,7 @@ const ExportModal = ({ onClose, rows, tbaConfig, lovatData, pitData }) => {
                 PIT {pitCols.length > 0 && <span className="stats-col-count">{pitCols.length}</span>}
               </button>
               {pitOpen && (
-                <div className="stats-picker pl-modal-drop pl-modal-drop-large">
+                <div className="stats-picker pl-modal-drop pl-modal-drop-xlarge">
                   <div className="stats-picker-header">Pit Scouting Fields</div>
                   {["Hardware","Auto","Endgame","Software","Notes"].map(grp => {
                     const fields = PIT_FIELDS.filter(f => f.group === grp);
@@ -2681,12 +2642,60 @@ const SplitPanel = ({ noConfig, tbaCall, tbaConfig }) => {
   }, [resizing]);
 
   // ── DRAG TABS ──
-  const dragTab = useRef(null); // { key, fromPanel }
+  const dragTab = useRef(null); // { key, fromPanel, fromIndex }
 
-  const onTabDragStart = (e, key, fromPanel) => {
-    dragTab.current = { key, fromPanel };
+  const onTabDragStart = (e, key, fromPanel, fromIndex) => {
+    dragTab.current = { key, fromPanel, fromIndex };
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", key);
+  };
+
+  const onTabDragOver = (e, overIndex, overPanel) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const onTabDrop = (e, dropIndex, dropPanel) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const { key, fromPanel, fromIndex } = dragTab.current ?? {};
+    if (!key) return;
+
+    // Reordering within same panel
+    if (fromPanel === dropPanel) {
+      if (fromIndex === dropIndex) return; // same position
+      
+      const tabs = fromPanel === "left" ? [...leftTabs] : [...rightTabs];
+      tabs.splice(fromIndex, 1); // remove from old position
+      tabs.splice(dropIndex, 0, key); // insert at new position
+      
+      if (fromPanel === "left") {
+        setLeftTabs(tabs);
+      } else {
+        setRightTabs(tabs);
+      }
+    } 
+    // Moving between panels
+    else {
+      if (fromPanel === "left") {
+        const newLeft  = leftTabs.filter(k => k !== key);
+        const newRight = [...rightTabs];
+        newRight.splice(dropIndex, 0, key); // insert at specific position
+        setLeftTabs(newLeft);
+        setRightTabs(newRight);
+        if (leftActive === key)  setLeftActive(newLeft[0]  ?? null);
+        setRightActive(key);
+      } else {
+        const newRight = rightTabs.filter(k => k !== key);
+        const newLeft  = [...leftTabs];
+        newLeft.splice(dropIndex, 0, key); // insert at specific position
+        setRightTabs(newRight);
+        setLeftTabs(newLeft);
+        if (rightActive === key) setRightActive(newRight[0] ?? null);
+        setLeftActive(key);
+      }
+    }
+    dragTab.current = null;
   };
 
   const onTabBarDrop = (e, toPanel) => {
@@ -2694,13 +2703,12 @@ const SplitPanel = ({ noConfig, tbaCall, tbaConfig }) => {
     const { key, fromPanel } = dragTab.current ?? {};
     if (!key || fromPanel === toPanel) return;
 
-    // Move tab from one panel to the other
+    // Move tab from one panel to the other (append to end)
     if (fromPanel === "left") {
       const newLeft  = leftTabs.filter(k => k !== key);
       const newRight = [...rightTabs, key];
       setLeftTabs(newLeft);
       setRightTabs(newRight);
-      // fix active tabs
       if (leftActive === key)  setLeftActive(newLeft[0]  ?? null);
       setRightActive(key);
     } else {
@@ -2730,7 +2738,7 @@ const SplitPanel = ({ noConfig, tbaCall, tbaConfig }) => {
           onDrop={e => onTabBarDrop(e, panelId)}
           onDragOver={onTabBarDragOver}
         >
-          {tabs.map(key => {
+          {tabs.map((key, index) => {
             const t = ALL_TABS.find(x => x.key === key);
             if (!t) return null;
             return (
@@ -2739,7 +2747,9 @@ const SplitPanel = ({ noConfig, tbaCall, tbaConfig }) => {
                 className={`tab-btn ${activeTab === key ? "tab-active" : ""}`}
                 onClick={() => setActive(key)}
                 draggable
-                onDragStart={e => onTabDragStart(e, key, panelId)}
+                onDragStart={e => onTabDragStart(e, key, panelId, index)}
+                onDragOver={e => onTabDragOver(e, index, panelId)}
+                onDrop={e => onTabDrop(e, index, panelId)}
               >
                 <span className="tab-drag-grip">⠿</span>
                 {t.label}
@@ -2774,11 +2784,6 @@ const SplitPanel = ({ noConfig, tbaCall, tbaConfig }) => {
       className={`split-container ${resizing ? "is-resizing" : ""}`}
     >
       <div className="split-left" style={{ width: `${splitPct}%` }}>
-        <div className="lovat-reminder">
-          <span className="lovat-reminder-icon">⚠</span>
-          Remember to upload the latest Lovat CSV before each match day — go to{" "}
-          <Link to="/config" className="lovat-reminder-link">Config</Link> to update.
-        </div>
         {renderPanel(leftTabs, safeLeftActive, (k) => { setLeftActive(k); }, "left")}
       </div>
 
@@ -2829,12 +2834,10 @@ export default function ScoutingDashboard() {
 
       {/* ── HEADER ── */}
       <header className="db-header">
-        <div className="logo-zone">
-          <div className="logo-box"><span className="logo-placeholder">CGW</span></div>
-          <div className="logo-text-group">
-            <span className="logo-team">FRC Team 2996</span>
-            <span className="logo-name">Cougars Gone Wired</span>
-          </div>
+        <div className="header-warning">
+          <span className="warning-icon">⚠</span>
+          <span className="warning-text">Did you upload the latest Lovat CSV?</span>
+          <Link to="/config" className="warning-link">Go to Config →</Link>
         </div>
 
         <div className="header-center">

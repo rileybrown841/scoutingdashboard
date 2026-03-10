@@ -1,0 +1,154 @@
+/* ========================================
+   PICKLIST DRAG AND DROP IMPROVEMENTS
+   ======================================== */
+
+/* Drag handle column */
+.pl-th-drag {
+  width: 30px;
+  text-align: center;
+  cursor: grab;
+  user-select: none;
+}
+
+.pl-td-drag {
+  text-align: center;
+  cursor: grab;
+  user-select: none;
+  padding: 8px 4px;
+}
+
+.pl-drag-handle {
+  color: rgba(255, 204, 0, 0.3);
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.pl-row:hover .pl-drag-handle {
+  color: rgba(255, 204, 0, 0.6);
+}
+
+/* Dragging state */
+.pl-row-dragging {
+  opacity: 0.5;
+  background: rgba(255, 204, 0, 0.1) !important;
+}
+
+.pl-row[draggable="true"] {
+  cursor: grab;
+}
+
+.pl-row[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* ========================================
+   EXPORT MODAL IMPROVEMENTS
+   ======================================== */
+
+/* Larger modal */
+.pl-modal-large {
+  width: 900px !important;
+  max-width: 95vw !important;
+  max-height: 90vh !important;
+  overflow-y: auto;
+}
+
+/* Default columns section */
+.pl-modal-default-cols {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 204, 0, 0.03);
+  border: 1px solid rgba(255, 204, 0, 0.15);
+  border-radius: 4px;
+}
+
+.pl-modal-default-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: rgba(232, 232, 228, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+/* Column tags for default columns */
+.pl-modal-col-tag.pl-modal-col-default {
+  background: rgba(13, 21, 32, 0.8);
+  border: 1px solid rgba(255, 204, 0, 0.25);
+  color: rgba(232, 232, 228, 0.7);
+  padding: 6px 12px;
+  border-radius: 3px;
+  font-size: 11px;
+  margin: 4px 6px 4px 0;
+  display: inline-block;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* Extra columns section */
+.pl-modal-extras-section {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 204, 0, 0.03);
+  border: 1px solid rgba(255, 204, 0, 0.15);
+  border-radius: 4px;
+}
+
+/* Larger dropdowns */
+.pl-modal-drop-large {
+  max-height: 500px !important;
+  width: 320px !important;
+}
+
+/* Extra-large dropdowns for better visibility */
+.pl-modal-drop-xlarge {
+  max-height: 600px !important;
+  width: 400px !important;
+}
+
+/* Larger section for data selection */
+.pl-modal-section-large {
+  min-height: 400px;
+}
+
+/* Better scrolling for modal */
+.pl-modal-large .pl-modal-section {
+  margin-bottom: 24px;
+}
+
+/* Improve column preview wrapping */
+.pl-modal-col-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.pl-modal-col-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1000px) {
+  .pl-modal-large {
+    width: 95vw !important;
+  }
+  
+  .pl-modal-drop-xlarge {
+    width: 380px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .pl-modal-drop-large {
+    width: 280px !important;
+    max-height: 400px !important;
+  }
+  
+  .pl-modal-drop-xlarge {
+    width: 300px !important;
+    max-height: 500px !important;
+  }
+}
