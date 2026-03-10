@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { DataProvider } from './Datacontext'
 import './global.css'
 import Landing from './landing'
@@ -9,7 +9,7 @@ import Dashboard from './dashboard'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <DataProvider>
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -17,6 +17,6 @@ createRoot(document.getElementById('root')).render(
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </DataProvider>
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>
 )
