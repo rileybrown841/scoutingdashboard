@@ -146,6 +146,44 @@ export function DataProvider({ children }) {
     load();
   }, []);
 
+  // ── Auto-poll pit scouting sheet every 30s ──
+  useEffect(() => {
+    const url = sheetUrls.pit;
+    if (!url) return;
+
+    const poll = async () => {
+      try {
+        const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+        if (!match) return;
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=csv`;
+        const res = await fetch(csvUrl);
+        if (!res.ok) return;
+        const text = await res.text();
+        const rows = parseCSV(text);
+        if (rows.length === 0) return;
+
+        // Only write to Firestore if row count changed
+        setPitData(prev => {
+          if (prev && prev.rows.length === rows.length) return prev;
+          const dataset = {
+            rows,
+            headers: Object.keys(rows[0]),
+            sheetUrl: url,
+            lastUpdated: new Date().toLocaleString(),
+            source: "sheet",
+          };
+          saveDataset("pit", dataset);
+          return dataset;
+        });
+      } catch {
+        // Silently ignore poll failures
+      }
+    };
+
+    const interval = setInterval(poll, 5_000);
+    return () => clearInterval(interval);
+  }, [sheetUrls.pit]);
+
   // ── Real-time listener on metadata docs so other visitors see updates live ──
   useEffect(() => {
     const unsubs = ["lovat", "headScout", "pit"].map((id) =>
