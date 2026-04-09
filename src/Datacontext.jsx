@@ -1,12 +1,23 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { db, auth } from "./firebase";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  onSnapshot,
+} from "firebase/firestore";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 
 // ── CSV PARSER ──
-// Handles quoted fields, commas inside quotes, and newlines
 export function parseCSV(text) {
   const rows = [];
   const lines = text.split(/\r?\n/);
-  
-  // Parse a single CSV line respecting quoted fields
+
   const parseLine = (line) => {
     const fields = [];
     let current = "";
@@ -40,60 +51,140 @@ export function parseCSV(text) {
   return rows;
 }
 
-// ── CONTEXT DEFINITION ──
+// ── FIRESTORE HELPERS ──
+// Firestore documents have a 1MB limit. Large CSVs are chunked across multiple docs.
+const CHUNK_SIZE = 400; // rows per chunk
+
+async function saveDataset(docId, dataset) {
+  if (!dataset) return;
+  const { rows, ...meta } = dataset;
+
+  // Write metadata doc
+  await setDoc(doc(db, "scouting", docId), {
+    ...meta,
+    rowCount: rows.length,
+    chunkCount: Math.ceil(rows.length / CHUNK_SIZE),
+  });
+
+  // Write row chunks
+  const chunkCount = Math.ceil(rows.length / CHUNK_SIZE);
+  for (let i = 0; i < chunkCount; i++) {
+    const chunk = rows.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+    await setDoc(doc(db, "scouting", `${docId}_chunk${i}`), { rows: chunk });
+  }
+}
+
+async function loadDataset(docId) {
+  const metaSnap = await getDoc(doc(db, "scouting", docId));
+  if (!metaSnap.exists()) return null;
+
+  const meta = metaSnap.data();
+  const { chunkCount, ...rest } = meta;
+
+  let rows = [];
+  for (let i = 0; i < chunkCount; i++) {
+    const chunkSnap = await getDoc(doc(db, "scouting", `${docId}_chunk${i}`));
+    if (chunkSnap.exists()) rows = rows.concat(chunkSnap.data().rows);
+  }
+
+  return { ...rest, rows };
+}
+
+async function deleteDataset(docId, chunkCount) {
+  await deleteDoc(doc(db, "scouting", docId));
+  for (let i = 0; i < (chunkCount ?? 10); i++) {
+    try { await deleteDoc(doc(db, "scouting", `${docId}_chunk${i}`)); } catch { /* ignore */ }
+  }
+}
+
+// ── CONTEXT ──
 const DataContext = createContext(null);
 
-const STORAGE_KEYS = {
-  lovat:     "sgw_lovat_data",
-  headScout: "sgw_headscout_data",
-  pit:       "sgw_pit_data",
-  sheetUrls: "sgw_sheet_urls",
-  tbaConfig: "sgw_tba_config",
-};
-
-// Load a value from localStorage safely
-function loadFromStorage(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-// Save a value to localStorage safely
-function saveToStorage(key, value) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (e) {
-    console.warn("localStorage write failed:", e);
-  }
-}
-
-// ── PROVIDER ──
 export function DataProvider({ children }) {
-  // Each dataset: { rows: [], headers: [], fileName: "", lastUpdated: "" }
-  const [lovatData,     setLovatData]     = useState(() => loadFromStorage(STORAGE_KEYS.lovat)     ?? null);
-  const [headScoutData, setHeadScoutData] = useState(() => loadFromStorage(STORAGE_KEYS.headScout) ?? null);
-  const [pitData,       setPitData]       = useState(() => loadFromStorage(STORAGE_KEYS.pit)       ?? null);
+  const [lovatData,     setLovatData]     = useState(null);
+  const [headScoutData, setHeadScoutData] = useState(null);
+  const [pitData,       setPitData]       = useState(null);
+  const [sheetUrls,     setSheetUrls]     = useState({ headScout: "", pit: "" });
+  const [tbaConfig,     setTbaConfig]     = useState({ apiKey: "", eventCode: "", teamNumber: "" });
 
-  // Persist saved sheet URLs so users don't have to re-enter them
-  const [sheetUrls, setSheetUrls] = useState(() => loadFromStorage(STORAGE_KEYS.sheetUrls) ?? { headScout: "", pit: "" });
+  const [user,       setUser]       = useState(null);   // firebase auth user
+  const [authReady,  setAuthReady]  = useState(false);  // true once auth state resolved
+  const [dataReady,  setDataReady]  = useState(false);  // true once initial Firestore load done
+  const [syncStatus, setSyncStatus] = useState("idle"); // "idle" | "saving" | "saved" | "error"
 
-  // TBA config: API key, event code, team number
-  const [tbaConfig, setTbaConfig] = useState(() => loadFromStorage(STORAGE_KEYS.tbaConfig) ?? { apiKey: "", eventCode: "", teamNumber: "" });
+  // ── Auth listener ──
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setAuthReady(true);
+    });
+    return unsub;
+  }, []);
 
-  // Sync to localStorage whenever data changes
-  useEffect(() => { if (lovatData)     saveToStorage(STORAGE_KEYS.lovat,     lovatData);     }, [lovatData]);
-  useEffect(() => { if (headScoutData) saveToStorage(STORAGE_KEYS.headScout, headScoutData); }, [headScoutData]);
-  useEffect(() => { if (pitData)       saveToStorage(STORAGE_KEYS.pit,       pitData);       }, [pitData]);
-  useEffect(() => {                    saveToStorage(STORAGE_KEYS.sheetUrls, sheetUrls);     }, [sheetUrls]);
-  useEffect(() => {                    saveToStorage(STORAGE_KEYS.tbaConfig, tbaConfig);     }, [tbaConfig]);
+  // ── Load all shared data from Firestore on mount ──
+  useEffect(() => {
+    async function load() {
+      try {
+        const [lovat, headScout, pit, urlsSnap, tbaSnap] = await Promise.all([
+          loadDataset("lovat"),
+          loadDataset("headScout"),
+          loadDataset("pit"),
+          getDoc(doc(db, "scouting", "sheetUrls")),
+          getDoc(doc(db, "scouting", "tbaConfig")),
+        ]);
+        if (lovat)     setLovatData(lovat);
+        if (headScout) setHeadScoutData(headScout);
+        if (pit)       setPitData(pit);
+        if (urlsSnap.exists()) setSheetUrls(urlsSnap.data());
+        if (tbaSnap.exists())  setTbaConfig(tbaSnap.data());
+      } catch (e) {
+        console.warn("Firestore load failed:", e);
+      } finally {
+        setDataReady(true);
+      }
+    }
+    load();
+  }, []);
 
-  const saveTbaConfig = (config) => setTbaConfig(config);
-  const clearTbaConfig = () => { setTbaConfig({ apiKey: "", eventCode: "", teamNumber: "" }); localStorage.removeItem(STORAGE_KEYS.tbaConfig); };
+  // ── Real-time listener on metadata docs so other visitors see updates live ──
+  useEffect(() => {
+    const unsubs = ["lovat", "headScout", "pit"].map((id) =>
+      onSnapshot(doc(db, "scouting", id), async (snap) => {
+        if (!snap.exists()) {
+          if (id === "lovat")     setLovatData(null);
+          if (id === "headScout") setHeadScoutData(null);
+          if (id === "pit")       setPitData(null);
+          return;
+        }
+        // Reload full dataset (chunks) when metadata changes
+        const dataset = await loadDataset(id);
+        if (id === "lovat")     setLovatData(dataset);
+        if (id === "headScout") setHeadScoutData(dataset);
+        if (id === "pit")       setPitData(dataset);
+      })
+    );
 
-  // ── LOVAT: parse uploaded CSV file ──
+    const tbaUnsub = onSnapshot(doc(db, "scouting", "tbaConfig"), (snap) => {
+      if (snap.exists()) setTbaConfig(snap.data());
+    });
+
+    const urlsUnsub = onSnapshot(doc(db, "scouting", "sheetUrls"), (snap) => {
+      if (snap.exists()) setSheetUrls(snap.data());
+    });
+
+    return () => { unsubs.forEach(u => u()); tbaUnsub(); urlsUnsub(); };
+  }, []);
+
+  // ── Auth actions ──
+  const login = async (email, password) => {
+    await signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const logout = async () => {
+    await signOut(auth);
+  };
+
+  // ── LOVAT: parse uploaded CSV and push to Firestore ──
   const uploadLovatCSV = (file) => {
     return new Promise((resolve, reject) => {
       if (!file || !file.name.endsWith(".csv")) {
@@ -101,7 +192,7 @@ export function DataProvider({ children }) {
         return;
       }
       const reader = new FileReader();
-      reader.onload = (ev) => {
+      reader.onload = async (ev) => {
         try {
           const rows = parseCSV(ev.target.result);
           if (rows.length === 0) { reject(new Error("Empty file")); return; }
@@ -112,9 +203,13 @@ export function DataProvider({ children }) {
             lastUpdated: new Date().toLocaleString(),
             source: "csv",
           };
+          setSyncStatus("saving");
+          await saveDataset("lovat", dataset);
           setLovatData(dataset);
+          setSyncStatus("saved");
           resolve(dataset);
         } catch (e) {
+          setSyncStatus("error");
           reject(e);
         }
       };
@@ -123,7 +218,7 @@ export function DataProvider({ children }) {
     });
   };
 
-  // ── SHEETS: fetch and parse a Google Sheet as CSV ──
+  // ── SHEETS: fetch Google Sheet CSV and push to Firestore ──
   const fetchGoogleSheet = async (url, dataKey) => {
     const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
     if (!match) throw new Error("Invalid Google Sheets URL");
@@ -145,21 +240,66 @@ export function DataProvider({ children }) {
       source: "sheet",
     };
 
+    const newUrls = { ...sheetUrls };
+    setSyncStatus("saving");
+
     if (dataKey === "headScout") {
+      await saveDataset("headScout", dataset);
+      newUrls.headScout = url;
       setHeadScoutData(dataset);
-      setSheetUrls(prev => ({ ...prev, headScout: url }));
     } else if (dataKey === "pit") {
+      await saveDataset("pit", dataset);
+      newUrls.pit = url;
       setPitData(dataset);
-      setSheetUrls(prev => ({ ...prev, pit: url }));
     }
+
+    await setDoc(doc(db, "scouting", "sheetUrls"), newUrls);
+    setSheetUrls(newUrls);
+    setSyncStatus("saved");
 
     return dataset;
   };
 
+  // ── TBA config ──
+  const saveTbaConfig = async (config) => {
+    setSyncStatus("saving");
+    await setDoc(doc(db, "scouting", "tbaConfig"), config);
+    setTbaConfig(config);
+    setSyncStatus("saved");
+  };
+
+  const clearTbaConfig = async () => {
+    await deleteDoc(doc(db, "scouting", "tbaConfig"));
+    setTbaConfig({ apiKey: "", eventCode: "", teamNumber: "" });
+  };
+
   // ── CLEAR helpers ──
-  const clearLovat     = () => { setLovatData(null);     localStorage.removeItem(STORAGE_KEYS.lovat);     };
-  const clearHeadScout = () => { setHeadScoutData(null); localStorage.removeItem(STORAGE_KEYS.headScout); };
-  const clearPit       = () => { setPitData(null);       localStorage.removeItem(STORAGE_KEYS.pit);       };
+  const clearLovat = async () => {
+    const snap = await getDoc(doc(db, "scouting", "lovat"));
+    const chunkCount = snap.exists() ? snap.data().chunkCount : 0;
+    await deleteDataset("lovat", chunkCount);
+    setLovatData(null);
+  };
+
+  const clearHeadScout = async () => {
+    const snap = await getDoc(doc(db, "scouting", "headScout"));
+    const chunkCount = snap.exists() ? snap.data().chunkCount : 0;
+    await deleteDataset("headScout", chunkCount);
+    const newUrls = { ...sheetUrls, headScout: "" };
+    await setDoc(doc(db, "scouting", "sheetUrls"), newUrls);
+    setHeadScoutData(null);
+    setSheetUrls(newUrls);
+  };
+
+  const clearPit = async () => {
+    const snap = await getDoc(doc(db, "scouting", "pit"));
+    const chunkCount = snap.exists() ? snap.data().chunkCount : 0;
+    await deleteDataset("pit", chunkCount);
+    const newUrls = { ...sheetUrls, pit: "" };
+    await setDoc(doc(db, "scouting", "sheetUrls"), newUrls);
+    setPitData(null);
+    setSheetUrls(newUrls);
+  };
 
   return (
     <DataContext.Provider value={{
@@ -175,6 +315,12 @@ export function DataProvider({ children }) {
       clearHeadScout,
       clearPit,
       clearTbaConfig,
+      user,
+      authReady,
+      dataReady,
+      syncStatus,
+      login,
+      logout,
     }}>
       {children}
     </DataContext.Provider>

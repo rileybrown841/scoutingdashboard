@@ -2,9 +2,97 @@ import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useData } from "./Datacontext";
 
+// ── AUTH PANEL ──
+const AuthPanel = () => {
+  const { user, authReady, login, logout, syncStatus } = useData();
+  const [email, setEmail]       = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError]       = useState("");
+  const [loggingIn, setLoggingIn] = useState(false);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoggingIn(true);
+    try {
+      await login(email.trim(), password);
+      setEmail("");
+      setPassword("");
+    } catch (err) {
+      setError(err.code === "auth/invalid-credential"
+        ? "Invalid email or password."
+        : err.message ?? "Login failed.");
+    } finally {
+      setLoggingIn(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  if (!authReady) return null;
+
+  if (user) {
+    return (
+      <div className="auth-bar">
+        <span className="auth-status">
+          <span className="auth-dot" />
+          LOGGED IN AS <strong>{user.email}</strong>
+          {syncStatus === "saving" && <span className="sync-pill saving">SYNCING...</span>}
+          {syncStatus === "saved"  && <span className="sync-pill saved">SYNCED</span>}
+          {syncStatus === "error"  && <span className="sync-pill error">SYNC ERROR</span>}
+        </span>
+        <button className="auth-logout-btn" onClick={handleLogout}>LOG OUT</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="auth-panel">
+      <div className="auth-panel-header">
+        <span className="panel-icon">🔒</span>
+        <div>
+          <h2 className="panel-title">Admin Login</h2>
+          <p className="panel-desc">Log in to upload or modify shared scouting data. All visitors can view data without logging in.</p>
+        </div>
+      </div>
+      <form className="auth-form" onSubmit={handleLogin}>
+        <input
+          className="tba-input"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+          autoComplete="email"
+        />
+        <input
+          className="tba-input"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+          autoComplete="current-password"
+        />
+        <button className="fetch-btn" type="submit" disabled={loggingIn}>
+          {loggingIn ? "LOGGING IN..." : "LOG IN"}
+        </button>
+      </form>
+      {error && (
+        <div className="sheet-status error" style={{ marginTop: 12 }}>
+          <span>✕</span><span>{error}</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ── TBA CONFIG PANEL ──
 const TBAConfigPanel = () => {
-  const { tbaConfig, saveTbaConfig, clearTbaConfig } = useData();
+  const { tbaConfig, saveTbaConfig, clearTbaConfig, user } = useData();
+  const canEdit = !!user;
 
   const [fields, setFields] = useState({
     apiKey:      tbaConfig?.apiKey      ?? "",
@@ -130,10 +218,10 @@ const TBAConfigPanel = () => {
       </div>
 
       <div className="tba-actions">
-        <button className="tba-test-btn" onClick={handleTest} disabled={testing}>
+        <button className="tba-test-btn" onClick={handleTest} disabled={testing || !canEdit}>
           {testing ? "TESTING..." : "TEST CONNECTION"}
         </button>
-        <button className="fetch-btn" onClick={handleSave}>
+        <button className="fetch-btn" onClick={handleSave} disabled={!canEdit}>
           {isSaved ? "✓ SAVED" : "SAVE"}
         </button>
       </div>
@@ -173,7 +261,8 @@ const GridBackground = () => (
 
 // ── LOVAT UPLOAD PANEL ──
 const LovatUpload = () => {
-  const { lovatData, uploadLovatCSV, clearLovat } = useData();
+  const { lovatData, uploadLovatCSV, clearLovat, user } = useData();
+  const canEdit = !!user;
   const [status, setStatus] = useState(null); // null | "loading" | "success" | "error"
   const [errorMsg, setErrorMsg] = useState("");
   const inputRef = useRef();
@@ -225,12 +314,13 @@ const LovatUpload = () => {
       </div>
 
       <div
-        className={`drop-zone ${isLoaded ? "dz-success" : ""} ${status === "error" ? "dz-error" : ""}`}
-        onDrop={handleDrop}
-        onDragOver={e => e.preventDefault()}
-        onClick={() => inputRef.current.click()}
+        className={`drop-zone ${isLoaded ? "dz-success" : ""} ${status === "error" ? "dz-error" : ""} ${!canEdit ? "dz-readonly" : ""}`}
+        onDrop={canEdit ? handleDrop : undefined}
+        onDragOver={canEdit ? e => e.preventDefault() : undefined}
+        onClick={canEdit ? () => inputRef.current.click() : undefined}
+        style={!canEdit ? { cursor: "default" } : {}}
       >
-        <input ref={inputRef} type="file" accept=".csv" onChange={handleInputChange} style={{ display: "none" }} />
+        <input ref={inputRef} type="file" accept=".csv" onChange={handleInputChange} style={{ display: "none" }} disabled={!canEdit} />
 
         {status === "loading" ? (
           <div className="dz-content">
@@ -253,8 +343,8 @@ const LovatUpload = () => {
           </div>
         ) : (
           <div className="dz-content">
-            <span className="dz-upload-icon">⬆</span>
-            <span className="dz-prompt">Drop CSV here or click to browse</span>
+            <span className="dz-upload-icon" style={!canEdit ? { opacity: 0.3 } : {}}>⬆</span>
+            <span className="dz-prompt">{canEdit ? "Drop CSV here or click to browse" : "Log in to upload data"}</span>
             <span className="dz-hint">.csv files only</span>
           </div>
         )}
@@ -276,7 +366,8 @@ const LovatUpload = () => {
 
 // ── GOOGLE SHEET PANEL ──
 const SheetPanel = ({ title, icon, description, dataKey }) => {
-  const { headScoutData, pitData, sheetUrls, fetchGoogleSheet, clearHeadScout, clearPit } = useData();
+  const { headScoutData, pitData, sheetUrls, fetchGoogleSheet, clearHeadScout, clearPit, user } = useData();
+  const canEdit = !!user;
 
   const data     = dataKey === "headScout" ? headScoutData : pitData;
   const clearFn  = dataKey === "headScout" ? clearHeadScout : clearPit;
@@ -330,7 +421,7 @@ const SheetPanel = ({ title, icon, description, dataKey }) => {
         <button
           className="fetch-btn"
           onClick={handleFetch}
-          disabled={!url.trim() || status === "loading"}
+          disabled={!url.trim() || status === "loading" || !canEdit}
         >
           {status === "loading" ? "..." : isLoaded ? "↻ REFRESH" : "FETCH"}
         </button>
@@ -623,6 +714,56 @@ export default function ConfigPage() {
         .tba-test-btn:hover { border-color: rgba(255,204,0,0.6); color: #ffcc00; background: rgba(255,204,0,0.05); }
         .tba-test-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+        /* AUTH */
+        .auth-panel {
+          background: rgba(12, 18, 26, 0.85);
+          border: 1px solid rgba(255,204,0,0.2);
+          clip-path: polygon(14px 0%, 100% 0%, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0% 100%, 0% 14px);
+          padding: 24px 32px;
+          backdrop-filter: blur(8px);
+          margin-bottom: 24px;
+        }
+        .auth-panel-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+        .auth-form { display: flex; flex-direction: column; gap: 10px; }
+        .auth-form .fetch-btn { align-self: flex-start; }
+
+        .auth-bar {
+          display: flex; align-items: center; justify-content: space-between;
+          background: rgba(34,197,94,0.06);
+          border: 1px solid rgba(34,197,94,0.2);
+          padding: 12px 20px; margin-bottom: 24px;
+          clip-path: polygon(8px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%, 0% 8px);
+        }
+        .auth-status {
+          font-family: 'Share Tech Mono', monospace; font-size: 11px;
+          color: rgba(34,197,94,0.8); letter-spacing: 1.5px;
+          display: flex; align-items: center; gap: 10px;
+        }
+        .auth-status strong { color: #e8e8e4; }
+        .auth-dot {
+          width: 7px; height: 7px; border-radius: 50%;
+          background: #22c55e;
+          box-shadow: 0 0 6px #22c55e;
+          flex-shrink: 0;
+        }
+        .auth-logout-btn {
+          font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 2px;
+          color: rgba(255,0,0,0.6); background: none;
+          border: 1px solid rgba(255,0,0,0.25); padding: 6px 14px; cursor: pointer;
+          transition: all 0.2s;
+        }
+        .auth-logout-btn:hover { color: #ff4444; border-color: rgba(255,0,0,0.6); background: rgba(255,0,0,0.05); }
+
+        .sync-pill {
+          font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 2px;
+          padding: 2px 8px; border-radius: 2px;
+        }
+        .sync-pill.saving { color: rgba(255,204,0,0.7); background: rgba(255,204,0,0.08); border: 1px solid rgba(255,204,0,0.2); }
+        .sync-pill.saved  { color: rgba(34,197,94,0.7);  background: rgba(34,197,94,0.08);  border: 1px solid rgba(34,197,94,0.2); }
+        .sync-pill.error  { color: rgba(255,0,0,0.7);    background: rgba(255,0,0,0.08);    border: 1px solid rgba(255,0,0,0.2); }
+
+        .dz-readonly { opacity: 0.6; }
+
         /* FOOTER */
         footer {
           position: relative; z-index: 10; padding: 20px 48px;
@@ -670,6 +811,8 @@ export default function ConfigPage() {
         <main>
           <h1 className="page-title">Configuration &amp; <span>Data Upload</span></h1>
           <p className="page-subtitle">▸ Manage data sources</p>
+
+          <AuthPanel />
 
           <div className="panels">
             <LovatUpload />
